@@ -1,8 +1,15 @@
 class Route{
-    constructor(route, component){
+    constructor(id, route, component){
         this.prev = null;
         this.next = null;
-        this.route = route;
+        this.id = id;
+        this.from = route;
+        this.to = null;
+        this.arrival = null;
+        this.departure = null;
+        this.distance = null;
+        this.duration = null;
+        this.isReturn = false;
         this.component = component
     }
 
@@ -10,8 +17,12 @@ class Route{
         return this.component
     }
 
-    getRoute(){
-        return this.route;
+    getRouteFrom(){
+        return this.from;
+    }
+
+    getRouteTo(){
+        return this.to;
     }
 }
 

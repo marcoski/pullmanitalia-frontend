@@ -25,37 +25,27 @@
                         </b-row>
                         <b-row class="mt-2 mb-2">
                             <b-col>
-                                <route-form 
-                                    id="a-1" 
-                                    title="Partenza"
-                                    v-on:route:changelocation="onChangeLocation"
-                                    v-on:route:changedate="onChangeDate"
-                                    :route="getRoute(0)"
+                                <route-form v-for="(route, index) of routes.toArray()"
+                                    :id="route.id" 
+                                    :title="route.component.title"
+                                    :route="route"
+                                    :count="routes.count()"
+                                    :isLast="routes.isLast(r => r.id === route.id)"
+                                    :isTour="isTour"
+                                    @route:changelocationfrom="onChangeLocationFrom"
+                                    @route:changelocationto="onChangeLocationTo"
+                                    @route:changedate="onChangeDate"
+                                    @route:return="onReturn"
                                 ></route-form>
-                                <template v-for="(routeComponent, index) in routesComponents">
-                                    <component 
-                                        v-bind:is="routeComponent.component" 
-                                        :id="routeComponent.id" 
-                                        :title="routeComponent.title"
-                                        :isLast="index === routesComponents.length - 1"
-                                        :count="routesComponents.length"
-                                        :route="getRoute(index + 1)"
-                                        :hasArrival="routeComponent.hasArrival"
-                                        @route:changelocation="onChangeLocation"
-                                        @route:changedate="onChangeDate"
-                                        @route:return="onReturn"
-                                    >
-                                    </component>
-                                </template>
                             </b-col>
                         </b-row>
                         <b-row class="mt-2 mb-2">
                             <b-col>
                                 <b-button-group>
-                                    <b-button size="md" variant="primary" @click.prevent="addRouteComponent">
+                                    <b-button size="md" variant="primary" @click.prevent="addNewRoute">
                                         <i class="fa fa-plus"></i> Aggiungi tappa / ritorno
                                     </b-button>
-                                    <b-button v-if="routes.length > 2" size="md" variant="warning" @click.prevent="removeRouteComponent">
+                                    <b-button v-if="routes.count() > 1" size="md" variant="warning" @click.prevent="removeRoute">
                                         <i class="fa fa-minus"></i> Rimuovi tappa
                                     </b-button>
                                 </b-button-group>
@@ -91,7 +81,14 @@
             :passengers="passengers"
             :isTour="isTour"
             @close="onResultClose"
+            v-on:onBooking="onBooking"
         ></result>
+        <booking
+            v-if="isBooking"
+            :class="[bookingDisplay]"
+            :rentals="rentals"
+            @close="onBookingClose"
+        ></booking>
         <b-modal ref="setReturnModal" hide-footer hide-header centered no-close-on-backdrop no-close-on-esc>
             <b-container fluid class="text-center return-modal">
                 <b-row>
@@ -111,216 +108,146 @@
             </b-container>
         </b-modal>
      </div>
-    
 </template>
 
 <script>
+
     import RouteForm from './components/RouteForm';
     import Result from './components/Result';
+    import Booking from './components/Booking';
     import DateTimeHandler from './classes/DateTimeHandler';
     import Ready from './plugin/vue-google-maps/mixins/Ready';
     import moment from 'moment';
     import RouteList from './classes/RouteList';
     import Route from './classes/Route';
+    
 
     export default {
         name: 'app',
 
         components: {
             RouteForm,
-            Result
+            Result,
+            Booking
         },
 
         mixins: [
             Ready
         ],
 
-        data: function(){
+         data: function(){
             return {
                 passengers: null,
-                routesComponents: [],
-                routes: [],
+                routes: new RouteList(),
+                rentals: [],
                 errorMessage: '',
                 error: false,
                 errorCountdown: 0,
                 errorDismissSecs: 5,
                 resultDisplay: 'none',
+                bookingDisplay: 'none',
                 planClass: 'block',
                 isSubmit: false,
+                isBooking: false,
                 isTour: false,
             }
         },
 
         created: function(){
-            this.addRoute('a-1');
-            const routeComponent = {
-                id: "r-" + (this.routesComponents.length + 1),
-                component: 'route-form',
-                title: "Tappa #" + (this.routesComponents.length + 1),
-                hasArrival: false
-            }
-            this.routesComponents.push(routeComponent);
-            this.addRoute(routeComponent.id);
+            this.addRoute();
         },
 
         methods: {
-            addRouteComponent: function(){
-                if(!this.checkForm()){
-                    return;
-                }
-                const routeComponent = {
-                    id: "r-" + (this.routesComponents.length + 1),
-                    component: 'route-form',
-                    title: "Tappa #" + (this.routesComponents.length + 1),
-                    hasArrival: false,
-                }
-                this.routesComponents.push(routeComponent);
-                this.addRoute(routeComponent.id);
+            addRoute: function(){
+                const route = new Route(
+                    'r-' + this.routes.count(), 
+                    {}, { title: "Tappa #" + (this.routes.count() + 1)}
+                );
+
+                this.routes.add(route);
             },
 
-            addRoute: function(id){
-                this.routes.push({
-                    id: id,
-                    isReturn: false,
-                    isPrevReturn: false
-                });
-
-                if(this.routes.length > 2 && this.routes[this.routes.length - 2].isReturn){
-                    this.routes[this.routes.length - 1].isPrevReturn = true;
-                }
-            },
-
-            removeRouteComponent: function(){
-                this.routesComponents.pop();
+            removeRoute: function(){
                 this.routes.pop();
-                this.routes[this.routes.length - 1].departure = null;
             },
 
-            onChangeLocation: function(location, route){
-                const routeIndex = this.routes.findIndex(r => r.id === route);
-                if(routeIndex !== undefined){
-                    this.routes[routeIndex].loc = location;
+            addNewRoute: function(){
+                const pre = this.routes.getLast();
+                this.addRoute();
+                const last = this.routes.getLast();
+                if(pre !== null && pre.to !== null){
+                    last.from = pre.to;
+                    this.$nextTick(() => {
+                        document.getElementById("from-" + last.id).value = pre.to.address;
+                    });
                 }
-
-                let countReadyRoutes = 0;
-                for(let route of this.routes){
-                    if(!(route.loc === undefined || route.loc === null || Object.keys(route.loc).length === 0)){
-                        countReadyRoutes++
-                    }
-                }
-                
-                if(countReadyRoutes >= 2){
-                    this.$emit('form:have-a-route', routeIndex - 1, routeIndex);
-                }
-            },
-
-            onChangeDate: function(date, route){
-                const routeIndex = this.routes.findIndex(r => r.id === route);
-                if(routeIndex !== undefined){
-                    this.routes[routeIndex].departure = date.format('YYYY-MM-DD HH:mm');
-                    this.$emit('form:have-a-route', routeIndex, routeIndex + 1);
-                }
-            },
-
-            onReturn: function(route, autocomplete){
-                const goingRouteIndex = 0;
-                const routeIndex = this.routes.findIndex(r => r.id === route);
-                if(routeIndex !== undefined){
-                    this.routes[routeIndex].loc = Object.assign(this.routes[goingRouteIndex].loc, {});
-                    this.routes[routeIndex].isReturn = true;
-                    document.getElementById(autocomplete).value = this.routes[routeIndex].loc.address;
-                    this.$emit('form:have-a-route', routeIndex - 1, routeIndex);
-                }
-            },
-
-            onResultClose: function(){
-                this.resultDisplay = 'none';
-                this.planClass = 'block';
-                this.routesComponents = [];
-                this.routes = [];
-                this.isSubmit = false;
-                this.addRoute('a-1');
-                const routeComponent = {
-                    id: "r-" + (this.routesComponents.length + 1),
-                    component: 'route-form',
-                    title: "Tappa #" + (this.routesComponents.length + 1),
-                    hasArrival: false
-                }
-                this.routesComponents.push(routeComponent);
-                this.addRoute(routeComponent.id);
-                this.passengers = '';
-                this.$radio.$emit('form:clear');
             },
 
             onReturnModalOk: function(){
                 this.$refs.setReturnModal.hide();
-                const routeComponent = {
-                    id: "r-" + (this.routesComponents.length + 1),
-                    component: 'route-form',
-                    title: "Tappa #" + (this.routesComponents.length + 1),
-                    hasArrival: false,
+                const pre = this.routes.getLast();
+                this.addRoute();
+                const last = this.routes.getLast();
+                last.isReturn = true;
+                if(pre !== null && pre.to !== null){
+                    last.from = pre.to;
+                    this.$nextTick(() => {
+                        document.getElementById("from-" + last.id).value = pre.to.address;
+                    });
                 }
-                this.routesComponents.push(routeComponent);
-                this.addRoute(routeComponent.id);
-                this.$nextTick(() => {
-                    const addedRoute = this.routes[this.routes.length - 1];
-                    addedRoute.loc = Object.assign(this.routes[0].loc, {});
-                    addedRoute.isReturn = true;
-                    document.getElementById('ac-' + addedRoute.id).value = this.routes[0].loc.address;
-                    this.$emit('form:have-a-route', this.routes.length - 2, this.routes.length - 1);
-                });
+
+                if(pre !== null && pre.from !== null){
+                    last.to = pre.from;
+                    this.$nextTick(() => {
+                        document.getElementById("to-" + last.id).value = pre.from.address;
+                    })
+                }
             },
 
             onReturnModalCancel: function(){
-                this.$refs.setReturnModal.hide();
+                 this.$refs.setReturnModal.hide();
                 this.isTour = false;
                 this.submit(true);
             },
 
-            checkForm: function(){
-                if(this.routes.length < 2){
-                    this.error = true;
-                    this.errorCountdown = this.errorDismissSecs;
-                    this.errorMessage = 'Controlla che il form sia compilato correttamente';
-                    return false;
+            onChangeLocationFrom: function(location, route){
+                const r = this.routes.find(r => r.id === route);
+                if(r !== null){
+                    r.from = location;
                 }
-
-                for(let i = 0; i < this.routes.length; i++){
-                    const route = this.routes[i];
-                    if(route.loc === undefined || route.loc === null || Object.keys(route.loc).length === 0){
-                        this.error = true;
-                        this.errorCountdown = this.errorDismissSecs;
-                        this.errorMessage = 'Controlla che il form sia compilato correttamente: errore location';
-                        return false;
-                    }
-
-                    if(i < this.routes.length - 1){
-                        if(route.departure === undefined || route.departure === null || route.departure === ''){
-                            this.error = true;
-                            this.errorCountdown = this.errorDismissSecs;
-                            this.errorMessage = 'Controlla che il form sia compilato correttamente: errore data';
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
             },
 
-            errorCountdownChange: function(countDown){
-                this.errorCountdown = countDown;
+            onChangeLocationTo: function(location, route){
+                const r = this.routes.find(r => r.id === route);
+                if(r !== null){
+                    if(r.to === null){
+                        r.to = location
+                    }
+                    this.$emit('form:have-a-route', r);
+                }
             },
 
-            getRoute: function(index){
-                if(this.routes[index] !== undefined){
-                    return this.routes[index];
+            onChangeDate: function(date, route){
+                const r = this.routes.find(r => r.id === route);
+                if(r !== null){
+                    r.departure = date.format('YYYY-MM-DD HH:mm');
+                    this.$emit('form:have-a-route', r);
                 }
+            },
 
-                return null;
+            onReturn: function(route, autocomplete){
+                const goingRoute = this.routes.getFirst();
+                const r = this.routes.find(r => r.id === route);
+                if(r !== undefined){
+                    r.to = Object.assign(goingRoute.from, {});
+                    r.isReturn = true;
+                    document.getElementById(autocomplete).value = r.to.address;
+                    this.$emit('form:have-a-route', r);
+                }
             },
 
             submit: function(skip=false){
-                if(!this.checkForm()){
+                if(!this.validForm()){
                     return false;
                 }
 
@@ -335,9 +262,9 @@
                    this.$refs.setReturnModal.show();
                    return false;
                 }else if(!skip){
-                    const start = this.routes[0];
-                    const end = this.routes[this.routes.length - 1];
-                    if(start.loc.address !== end.loc.address){
+                    const start = this.routes.getFirst();
+                    const end = this.routes.getLast();
+                    if(start.from.address !== end.to.address){
                         this.$refs.setReturnModal.show();
                         return false;
                     }
@@ -346,37 +273,82 @@
                 this.isSubmit = true;
                 this.planClass = 'none';
                 this.resultDisplay = 'fixed';
+            },
+
+            errorCountdownChange: function(countDown){
+                this.errorCountdown = countDown;
+            },
+
+            validForm: function(){
+                const routes = this.routes.toArray();
+                for(let i = 0; i < routes.length; i++){
+                    const route = routes[i];
+                    if(route.to === null || route.from === null){
+                        this.error = true;
+                        this.errorCountdown = this.errorDismissSecs;
+                        this.errorMessage = 'Controlla che il form sia compilato correttamente: errore location';
+                        return false;
+                    }
+
+                    if(route.departure === null){
+                        this.error = true;
+                        this.errorCountdown = this.errorDismissSecs;
+                        this.errorMessage = 'Controlla che il form sia compilato correttamente: errore data';
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+
+            onResultClose: function(){
+                this.resultDisplay = 'none';
+                this.close();
+            },
+
+            onBookingClose: function(){
+                this.bookingDisplay = 'none';
+                this.close();
+            },
+
+            close: function(){
+                this.planClass = 'block';
+                this.routesComponents = [];
+                this.routes = new RouteList();
+                this.isSubmit = false;
+                this.addRoute();
+                this.passengers = '';
+                this.$radio.$emit('form:clear');
+            },
+
+            onBooking: function(rentals){
+                this.rentals = rentals;
+                this.resultDisplay = 'none';
+                this.bookingDisplay = 'fixed';
+                this.isBooking = true;
             }
         },
 
         googleMapsReady: function(){
-            this.$on('form:have-a-route', (startIndex, endIndex) => {
-                if(startIndex < 0 || endIndex >= this.routes.length){
+            this.$on('form:have-a-route', (route) => {
+                if(route.to === null){
                     return;
                 }
 
                 const ds = new google.maps.DirectionsService;
-                const startRoute = this.routes[startIndex]; // ex routeOne 
-                let endRoute = this.routes[endIndex]; // ex endRoute
-                
-                if(endRoute.loc === undefined){
-                    return;
-                }
-
-                if(!(startRoute.departure === undefined || startRoute.departure === null || startRoute.departure === '')){
+                if(!(route.departure === undefined || route.departure === null || route.departure === '')){
                     ds.route({
-                        origin: startRoute.loc,
-                        destination: endRoute.loc,
+                        origin: route.from,
+                        destination: route.to,
                         travelMode: 'DRIVING'
                     }, (response, status) => {
                         const legs = response.routes[0].legs[0];
-                        const tmpArrival = moment(startRoute.departure);
+                        const tmpArrival = moment(route.departure);
                         tmpArrival.add(legs.duration.value, 'seconds');
                         const arrival = DateTimeHandler.floorTimeToQuarter(tmpArrival);
-                        endRoute.arrival = arrival.format("YYYY-MM-DD HH:mm");
-                        endRoute.duration = DateTimeHandler.getDurationDiff(startRoute.departure, arrival);
-                        endRoute.distance = legs.distance.value;
-                        this.routesComponents[endIndex - 1].hasArrival = true;
+                        route.arrival = arrival.format("YYYY-MM-DD HH:mm");
+                        route.duration = DateTimeHandler.getDurationDiff(route.departure, arrival);
+                        route.distance = legs.distance.value;
                     });
                 }
             });

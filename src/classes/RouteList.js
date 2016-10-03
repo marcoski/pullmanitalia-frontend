@@ -8,6 +8,10 @@ class RouteList{
         this.tail = null;
     }
 
+    count(){
+        return this._length;
+    }
+
     add(route){
         if(!this.head){
             this.head = route;
@@ -39,13 +43,94 @@ class RouteList{
         this._length--;
     }
 
+    pop(){
+        const route = this.tail;
+        this.remove(route);
+        return route;
+    }
+
+    find(callback){
+        let current = this.head;
+        let index = 0;
+        while(current){
+            if(callback.call(this, current, index)){
+                return current;
+            }
+            index++;
+            current = current.next;
+        }
+
+        return null;
+    }
+
+    findIndex(callback){
+        let current = this.head;
+        let index = 0;
+        while(current){
+            if(callback.call(this, current, index)){
+                return index;
+            }
+            index++;
+            current = current.next;
+        }
+
+        return null;
+    }
+
+    getFirst(){
+        return this.head;
+    }
+
+    getLast(){
+        return this.tail;
+    }
+
+    isLast(compare){
+        const last = this.getLast();
+        return compare.call(this, last);
+    }
+
+    getSteps(){
+        let current = this.head;
+        let steps = [];
+        while(current){
+            steps.push(current.from);
+            steps.push(current.to);
+            current = current.next;
+        }
+
+        steps = steps.reduce((acc, value, index) => {
+            if(index === 0 || index === steps.length - 1){
+                acc.push(value);
+            }else{
+                const found = acc.find((s) => { return s.address === value.address });
+                if(found === undefined){
+                    acc.push(value);
+                }
+            }
+
+            return acc;
+        }, []);
+
+        return steps;
+    }
+
     toArray(){
         /** @type Route */
         let current = this.head;
         let listArray = [];
         while(current){
             const route = {
-                route: current.getRoute(),
+                id: current.id,
+                prev: current.prev,
+                next: current.next,
+                from: current.getRouteFrom(),
+                to: current.getRouteTo(),
+                arrival: current.arrival,
+                departure: current.departure,
+                distance: current.distance,
+                duration: current.duration,
+                isReturn: current.isReturn,
                 component: current.getComponent()
             }
             listArray.push(route);
@@ -54,8 +139,8 @@ class RouteList{
         return listArray;
     }
 
-    [Symbol.iterator]() {
-        return this.toArray();
+    toString(){
+        return JSON.parse(JSON.stringify(this.toArray()));
     }
 }
 

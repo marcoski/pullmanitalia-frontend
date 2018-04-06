@@ -1,0 +1,15 @@
+.operation-container{
+    position: relative;
+
+    .operation{
+        position: absolute;
+        top: 25px;
+        left: 10px;
+        background: transparentize(map-get($theme-colors, 'warning'), 0.2);
+        width: 10%;
+        text-align: center;
+        padding: 0.5em;
+        cursor: pointer;
+        transform: all .25s ease-in-out;
+    }
+}

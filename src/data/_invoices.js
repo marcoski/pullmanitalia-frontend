@@ -1,0 +1,153 @@
+export default{
+    items: [
+        {
+            id: 1,
+            idPaese: 'IT',
+            idCodice: '07672820581',
+            progressivoInvio: '906',
+            formatoTrasmissione: 'FPA12',
+            codiceDestinatario: 'UF7F0Z',
+            cedentePrestatore: { /** in questo caso è pullmanitalia **/
+                id: 1,
+                name: 'Green Tour',
+                email: 'info@greentour.it',
+                city: 'Roma',
+                district: 'RM',
+                country: 'Italia',
+                address: 'Via di novella 18',
+                cap: '00199',
+                phone: '3286115551',
+                mobile: '3286115551',
+                cuu: null,
+                pecMail: null,
+                vat: '01837391000',
+                fiscalCode: '07672820581',
+                regimeFiscale: 'RF01',
+                pullmans: 5,
+                bank_account: {
+                    beneficiary: 'Barbara D\'agnelli',
+                    bank_name: 'UBI Banca',
+                    bic_swift_code: 'BLOPIT22XXX',
+                    iban: 'IT98W000000119987'
+                }
+            },
+            cessionariCommittente: { /** in questo caso è un cliente PA */
+                id: 3,
+                name: 'Istituto comprensivo - via carrotenuto 30',
+                trusted: true,
+                email: 'rmic8cz006@pec.istruzione.it',
+                feedback: 110,
+                city: 'Roma',
+                district: 'RM',
+                country: 'Italia',
+                address: 'Via Carrotenuto, 30',
+                cap: '00125',
+                cuu: 'UF7F0Z',
+                pecMail: 'rmic8cz006@pec.istruzione.it',
+                vat: null,
+            },
+            tipoDocumento: 'TD01',
+            divisa: 'EUR',
+            data: '2018-02-23',
+            numeroDocumento: '75/E/2018',
+            causale: 'Fattura Vendita',
+            ordiniDiAcquisto: [
+                {
+                    numeroLinea: 1,
+                    descrizione: 'B9320/R16403 - 15/02/2018 - P21 - 1/2 GIORNATA - Via omero 4 - Ora: 8:15 - Da: Via Piero...',
+                    quantita: 1.00,
+                    unitaMisura: 'PZ',
+                    prezzoUnitario: 198.0000,
+                    aliquotaIVA: 10.00,
+                    esigibilitaIVA: 'S'
+
+                },
+                {
+                    numeroLinea: 2,
+                    descrizione: 'ZTL',
+                    quantita: 1.00,
+                    unitaMisura: 'PZ',
+                    prezzoUnitario: 24.0000,
+                    aliquotaIVA: 10.00,
+                    esigibilitaIVA: 'S'
+                }
+            ],
+            condizioniPagamento: 'TP02',
+            modalitaPagamento: 'MP05',
+            dataScadenzaPagamento: '2018-03-25',
+
+        },
+        {   /** Fattura elettronica x la prestazione di servizio di un fornitore a pullmanitalia */
+            id: 2,
+            idPaese: 'IT',
+            idCodice: '12345678912',
+            progressivoInvio: '907',
+            formatoTrasmissione: 'FPR12',
+            codiceDestinatario: '0000000',
+            pecDestinatario: 'pec@greentour.it',
+            cedentePrestatore: { /** in questo caso è un fornitore */
+                id: 2,
+                name: 'Flixbus',
+                email: 'info@flixbus.it',
+                city: 'Roma',
+                district: 'RM',
+                phone: '3286115551',
+                mobile: '3286115551',
+                cuu: null,
+                pecMail: 'pec-flixbus@pec.flixbus.it',
+                country: 'Italia',
+                address: 'Via di novella 18',
+                cap: '00199',
+                vat: '283764680',
+                fiscalCode: '12345678912',
+                regimeFiscale: 'RF01',
+                pullmans: 100,
+                bank_account: {
+                    beneficiary: 'Barbara D\'agnelli',
+                    bank_name: 'UBI Banca',
+                    bic_swift_code: 'BLOPIT22XXX',
+                    iban: 'IT98W000000119987'
+                }
+            },
+            cessionariCommittente: { /** in questo caso è pullmanitalia **/
+                id: 1,
+                name: 'Green Tour',
+                email: 'info@greentour.it',
+                city: 'Roma',
+                district: 'RM',
+                country: 'Italia',
+                address: 'Via di novella 18',
+                cap: '00199',
+                phone: '3286115551',
+                mobile: '3286115551',
+                cuu: null,
+                pecMail: 'pec@greentour.it',
+                vat: '01837391000',
+                fiscalCode: '07672820581',
+                regimeFiscale: 'RF01',
+                pullmans: 5,
+            },
+            tipoDocumento: 'TD01',
+            divisa: 'EUR',
+            data: '2018-02-23',
+            numeroDocumento: '01/PI/E/2018',
+            causale: 'Fattura Vendita',
+            ordiniDiAcquisto: [
+                {
+                    numeroLinea: 1,
+                    descrizione: 'B9320/R16403 - 15/02/2018 - P21 - 1/2 GIORNATA - SVOLGIMENTO SERVIZIO TRASPORTO',
+                    quantita: 1.00,
+                    unitaMisura: 'PZ',
+                    prezzoUnitario: 170.7600,
+                    aliquotaIVA: 10.00,
+                    esigibilitaIVA: 'S'
+
+                }
+            ],
+            condizioniPagamento: 'TP02',
+            modalitaPagamento: 'MP05',
+            dataScadenzaPagamento: '2018-03-25',
+        },
+    ],
+    count: 2
+}

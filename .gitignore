@@ -1,0 +1,11 @@
+app/scripts/vendor
+node_modules
+dist
+.buildpath
+.idea/
+.project
+.settings/
+.vagrant/
+.vscode/
+public/
+npm-debug.log

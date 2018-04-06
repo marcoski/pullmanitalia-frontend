@@ -1,0 +1,31 @@
+/*
+ * Pullman Italia - SCSS
+ * @version v1.0.0
+ * Copyright (c) 2017 Commonhelp.it Marco Trognoni
+ */
+
+/* import Relaway font */
+@import url('https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,500,500i,600,600i,700,700i');
+
+/* import Roboto mono font */
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono:300,300i,400,400i,500,500i,700,700i');
+
+/* Import Font Awesome icon set */
+$fa-font-path: '~font-awesome/fonts';
+@import "~font-awesome/css/font-awesome.min.css";
+
+/* Import PullmanItalia icon set */
+$pi-icon-font-path: 'icon/fonts';
+@import "./icon/scss/pi-icon.scss";
+
+/* Import Bootstrap Vue Styles */
+@import "~bootstrap-vue/dist/bootstrap-vue.css";
+
+// Override Bootstrap variables
+@import "boostrap_variables";
+
+// Import bootstrap source files
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+// Import core styles
+@import "core/core";

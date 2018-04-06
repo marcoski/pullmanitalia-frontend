@@ -1,0 +1,133 @@
+// Bootstrap overrides
+//
+// Color system
+//
+$white:                           #fff;
+$gray-100:                        #f0f3f5;
+$gray-200:                        #c2cfd6;
+$gray-300:                        #a4b7c1;
+$gray-400:                        #869fac;
+$gray-500:                        #678898;
+$gray-600:                        #536c79;
+$gray-700:                        #3e515b;
+$gray-800:                        #29363d;
+$gray-900:                        #151b1e;
+$black:                           #000 !default;
+
+$blue:                            #20a8d8;
+$indigo:                          #6610f2 !default;
+$purple:                          #6f42c1 !default;
+$pink:                            #e83e8c !default;
+$red:                             #f86c6b;
+$orange:                          #f8cb00;
+$yellow:                          #ffc107 !default;
+$green:                           #4dbd74;
+$teal:                            #20c997 !default;
+$cyan:                            #63c2de;
+
+$colors: (
+        blue:                           $blue,
+        indigo:                         $indigo,
+        purple:                         $purple,
+        pink:                           $pink,
+        red:                            $red,
+        orange:                         $orange,
+        yellow:                         $yellow,
+        green:                          $green,
+        teal:                           $teal,
+        cyan:                           $cyan,
+        white:                          $white,
+        gray:                           $gray-600,
+        gray-dark:                      $gray-800
+);
+
+$theme-colors: (
+        primary:                        $blue,
+        secondary:                      $gray-300,
+        success:                        $green,
+        info:                           $cyan,
+        warning:                        $yellow,
+        danger:                         $red,
+        light:                          $gray-100,
+        medium:                         $gray-400,
+        dark:                           $gray-800,
+        home:                           $purple,
+        customers:                      $teal,
+        suppliers:                      $indigo
+);
+
+// The yiq lightness value that determines when the lightness of color changes from "dark" to "light". Acceptable values are between 0 and 255.
+$yiq-contrasted-threshold: 150;
+
+// Customize the light and dark text colors for use in our YIQ color contrast function.
+$yiq-text-dark: $gray-900;
+$yiq-text-light: $white;
+
+// Color contrast
+@function color-yiq($color) {
+  $r: red($color);
+  $g: green($color);
+  $b: blue($color);
+
+  $yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+  @if ($yiq >= $yiq-contrasted-threshold) {
+    @return $yiq-text-dark;
+  } @else {
+    @return $yiq-text-light;
+  }
+}
+
+
+
+// Body
+//
+// Settings for `<body>` element.
+
+$body-bg:                               #e4e5e6;
+
+// Typography
+//
+// Font, line-height, and color for body text, headings and more
+
+$font-family-sans-serif:                'Raleway';
+$font-family-monospace:                 'Roboto Mono';
+$font-family-base:                      $font-family-sans-serif;
+
+$font-size-base:                        0.875rem;
+
+//Breadcrumbs
+$breadcrumb-bg:                         #fff;
+
+// Cards
+$card-border-color:                     $gray-200;
+$card-cap-bg:                           $gray-100;
+
+// Dropdowns
+$dropdown-padding-y:                    0;
+$dropdown-border-color:                 $gray-200;
+$dropdown-divider-bg:                   $gray-100;
+
+//Modal
+$modal-lg:                              1200px;
+$modal-md:                              800px;
+$modal-sm:                              500px;
+$modal-header-padding:                  0.5rem;
+$modal-inner-padding:                   0.5rem;
+
+//Buttons
+$btn-border-radius:                     0;
+
+//Pagination
+$pagination-bg:                         map_get($theme-colors, 'secondary');
+$pagination-border-color:               darken($pagination-bg, 10%);
+$pagination-color:                      color-yiq($pagination-bg);
+$pagination-hover-bg:                   darken($pagination-bg, 7.5%);
+$pagination-hover-border-color:         darken($pagination-hover-bg, 10%);
+$pagination-hover-color:                color-yiq($pagination-hover-bg);
+$pagination-active-bg:                  $pagination-hover-bg;
+$pagination-active-border-color:        darken($pagination-active-bg, 10%);
+$pagination-active-color:               color-yiq($pagination-hover-bg);
+$pagination-disabled-bg:                lighten($pagination-bg, 10%);
+$pagination-disabled-border-color:      $pagination-border-color;
+$pagination-disabled-color:             lighten($pagination-color, 10%);

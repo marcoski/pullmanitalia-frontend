@@ -1,0 +1,32 @@
+export default {
+    id: 0,
+    name: null,
+    email: null,
+    trusted: false,
+    feedback: 0,
+    city: null,
+    district: null,
+    country: null,
+    address: null,
+    cap: null,
+    cuu: null,
+    fiscalCode: null,
+    pecMail: null,
+    vat: null,
+    bookings: [],
+    user: {
+        id: 0,
+        email: null,
+        avatar: null,
+        name: null,
+        surname: null,
+        phone: null,
+        mobile: null,
+        cap: null,
+        address: null,
+        district: null,
+        country: null,
+        city: null
+    },
+    bank_account: null
+}

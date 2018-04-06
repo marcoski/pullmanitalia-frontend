@@ -7,5 +7,4 @@ dist
 .settings/
 .vagrant/
 .vscode/
-public/
 npm-debug.log

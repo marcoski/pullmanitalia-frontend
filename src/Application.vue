@@ -36,6 +36,9 @@
                                 <b-button size="md" variant="primary" @click.prevent="addRouteComponent">
                                     <i class="fa fa-plus"></i> Aggiungi tappa / ritorno
                                 </b-button>
+                                <b-button v-if="routes.length > 2" size="md" variant="warning" @click.prevent="removeRouteComponent">
+                                    <i class="fa fa-minus"></i> Rimuovi tappa
+                                </b-button>
                             </b-button-group>
                         </b-col>
                     </b-row>
@@ -57,7 +60,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col>
-                            <b-button size="lg" variant="primary">
+                            <b-button size="lg" variant="primary" @click.prevent="submit">
                                 <i class="fa fa-search"></i>
                                 Cerca
                             </b-button>
@@ -88,7 +91,7 @@
 
         data: function(){
             return {
-                passenger: '',
+                passenger: null,
                 routesComponents: [],
                 routes: [],
                 errorMessage: '',
@@ -127,8 +130,19 @@
 
             addRoute: function(id){
                 this.routes.push({
-                    id: id
+                    id: id,
+                    isReturn: false,
+                    isPrevReturn: false
                 });
+
+                if(this.routes.length > 2 && this.routes[this.routes.length - 2].isReturn){
+                    this.routes[this.routes.length - 1].isPrevReturn = true;
+                }
+            },
+
+            removeRouteComponent: function(){
+                this.routesComponents.pop();
+                this.routes.pop();
             },
 
             onChangeLocation: function(location, route){
@@ -161,6 +175,7 @@
                 const routeIndex = this.routes.findIndex(r => r.id === route);
                 if(routeIndex !== undefined){
                     this.routes[routeIndex].loc = Object.assign(this.routes[goingRouteIndex].loc, {});
+                    this.routes[routeIndex].isReturn = true;
                     document.getElementById(autocomplete).value = this.routes[routeIndex].loc.address;
                     this.$emit('form:have-a-route');
                 }
@@ -206,6 +221,21 @@
                 }
 
                 return null;
+            },
+
+            submit: function(){
+                if(!this.checkForm()){
+                    return false;
+                }
+
+                if(this.passenger === null || this.passenger === ''){
+                    this.error = true;
+                    this.errorCountdown = this.errorDismissSecs;
+                    this.errorMessage = 'Inserisci il numero dei passeggeri';
+                    return false;
+                }
+
+                console.log(JSON.parse(JSON.stringify(this.routes)), this.passenger);
             }
         },
 
@@ -228,7 +258,6 @@
                         routeTwo.duration = DateTimeHandler.getDurationDiff(routeOne.departure, arrival);
                         routeTwo.distance = legs.distance.value;
                         this.routesComponents[this.routesComponents.length-1].hasArrival = true;
-                        console.log(JSON.parse(JSON.stringify(this.routes)));
                     });
                 }
             });

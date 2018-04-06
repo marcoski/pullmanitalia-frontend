@@ -21,7 +21,7 @@
                         </div>
                     </b-form-group>
                 </b-col>
-                <b-col v-if="isLast && count > 1">
+                <b-col v-if="isLast && count > 1 && !route.isReturn && !route.isPrevReturn">
                     <b-form-group label="">
                         <b-button size="lg" variant="primary" @click.prevent="onReturnClick">Ritorna al punto di partenza</b-button>
                     </b-form-group>

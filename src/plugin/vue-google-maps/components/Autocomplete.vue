@@ -31,7 +31,7 @@
             classname: String,
             placeholder: String,
             types: {
-                type: String,
+                type: [String, Array],
                 default: 'address'
             },
             country: {
@@ -72,7 +72,11 @@
             const options = {};
 
             if(this.types){
-                options.types = [this.types];
+                if(typeof this.types === 'string'){
+                    options.types = [this.types];
+                }else{
+                    options.types = this.types;
+                }
             }
 
             if(this.country){

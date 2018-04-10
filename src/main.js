@@ -24,7 +24,8 @@ Vue.use(VueResizeObserver);
 Vue.use(VueGoogleMapsPlugin, {
     load: {
         apiKey: 'AIzaSyCeIV2gmisWRMFTyHqVM8h00FrtoMKBSr0', /** Pullman italia API KEY for GoogleMaps */
-        libraries: ['places']
+        libraries: ['places'],
+        language: Configs.locale
     }
 });
 new Vue({

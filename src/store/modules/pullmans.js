@@ -56,9 +56,8 @@ export default {
         loadPullmans: function(context, payload){
             return new Promise(resolve => {
                 setTimeout(() => {
-                    /** Filters all pullmans by supplier id */
                     const pullmans = {};
-                    pullmans.items = Pullmans.items.filter(pullman => pullman.supplier == payload.data);
+                    pullmans.items = Pullmans.items;
                     pullmans.count = Pullmans.count = pullmans.items.length;
                     context.commit('loadPullmans', pullmans);
                     resolve();

@@ -1,88 +1,134 @@
 <template>
-    <b-container>
+    <div>
         <section class="plan-container">
-            <div class="plan-content">
-                <h3>Inizia il tuo viaggio</h3>
-                <b-form>
-                    <b-row>
-                        <b-col>
-                            <route-form 
-                                id="a-1" 
-                                title="Partenza"
-                                v-on:route:changelocation="onChangeLocation"
-                                v-on:route:changedate="onChangeDate"
-                                :route="getRoute(0)"
-                            ></route-form>
-                            <template v-for="(routeComponent, index) in routesComponents">
-                                <component 
-                                    v-bind:is="routeComponent.component" 
-                                    :id="routeComponent.id" 
-                                    :title="routeComponent.title"
-                                    :isLast="index === routesComponents.length - 1"
-                                    :count="routesComponents.length"
-                                    :route="getRoute(index + 1)"
-                                    :hasArrival="routeComponent.hasArrival"
-                                    @route:changelocation="onChangeLocation"
-                                    @route:changedate="onChangeDate"
-                                    @route:return="onReturn"
-                                >
-                                </component>
-                            </template>
-                        </b-col>
-                    </b-row>
-                    <b-row class="mt-2 mb-2">
-                        <b-col>
-                            <b-button-group>
-                                <b-button size="md" variant="primary" @click.prevent="addRouteComponent">
-                                    <i class="fa fa-plus"></i> Aggiungi tappa / ritorno
+            <b-container>
+                <div class="plan-content">
+                    <h3>Inizia il tuo viaggio</h3>
+                    <b-form>
+                        <b-row>
+                            <b-col>
+                                <b-card header="Inizia...">
+                                    <b-row>
+                                        <b-col>
+                                            <b-form-group label="Numero di partecipanti" description="Puoi inserire anche un numero indicativo">
+                                                <b-form-input type="text" v-model="passengers"></b-form-input>
+                                            </b-form-group>
+                                        </b-col>
+                                        <b-col>
+                                            <b-form-checkbox v-model="isTour">
+                                                Vuoi il pullman sempre a disposizione?
+                                            </b-form-checkbox>
+                                        </b-col>
+                                    </b-row>
+                                </b-card>
+                            </b-col>
+                        </b-row>
+                        <b-row class="mt-2 mb-2">
+                            <b-col>
+                                <route-form 
+                                    id="a-1" 
+                                    title="Partenza"
+                                    v-on:route:changelocation="onChangeLocation"
+                                    v-on:route:changedate="onChangeDate"
+                                    :route="getRoute(0)"
+                                ></route-form>
+                                <template v-for="(routeComponent, index) in routesComponents">
+                                    <component 
+                                        v-bind:is="routeComponent.component" 
+                                        :id="routeComponent.id" 
+                                        :title="routeComponent.title"
+                                        :isLast="index === routesComponents.length - 1"
+                                        :count="routesComponents.length"
+                                        :route="getRoute(index + 1)"
+                                        :hasArrival="routeComponent.hasArrival"
+                                        @route:changelocation="onChangeLocation"
+                                        @route:changedate="onChangeDate"
+                                        @route:return="onReturn"
+                                    >
+                                    </component>
+                                </template>
+                            </b-col>
+                        </b-row>
+                        <b-row class="mt-2 mb-2">
+                            <b-col>
+                                <b-button-group>
+                                    <b-button size="md" variant="primary" @click.prevent="addRouteComponent">
+                                        <i class="fa fa-plus"></i> Aggiungi tappa / ritorno
+                                    </b-button>
+                                    <b-button v-if="routes.length > 2" size="md" variant="warning" @click.prevent="removeRouteComponent">
+                                        <i class="fa fa-minus"></i> Rimuovi tappa
+                                    </b-button>
+                                </b-button-group>
+                            </b-col>
+                        </b-row>
+                        <b-row v-if="error">
+                            <b-col>
+                                <b-alert 
+                                    :show="errorCountdown"
+                                    variant="warning"
+                                    dismissible 
+                                    @dismissed="errorCountdown=0"
+                                    @dismiss-count-down="errorCountdownChange"
+                                >{{ errorMessage }}</b-alert>
+                            </b-col>
+                        </b-row>
+                        <b-row class="mt-3 mb-3">
+                            <b-col>
+                                <b-button size="lg" variant="primary" @click.prevent="submit(false)">
+                                    <i class="fa fa-search"></i>
+                                    Cerca
                                 </b-button>
-                                <b-button v-if="routes.length > 2" size="md" variant="warning" @click.prevent="removeRouteComponent">
-                                    <i class="fa fa-minus"></i> Rimuovi tappa
-                                </b-button>
-                            </b-button-group>
-                        </b-col>
-                    </b-row>
-                    <b-row v-if="error">
-                        <b-col>
-                            <b-alert 
-                                :show="errorCountdown"
-                                variant="warning"
-                                dismissible 
-                                @dismissed="errorCountdown=0"
-                                @dismiss-count-down="errorCountdownChange"
-                            >{{ errorMessage }}</b-alert>
-                        </b-col>
-                    </b-row>
-                    <b-row class="mt-3 mb-3">
-                        <b-col>
-                            <b-form-group label="Numero di partecipanti" description="Puoi inserire anche un numero indicativo">
-                                <b-form-input type="text" v-model="passenger"></b-form-input>
-                            </b-form-group>
-                        </b-col>
-                        <b-col>
-                            <b-button size="lg" variant="primary" @click.prevent="submit">
-                                <i class="fa fa-search"></i>
-                                Cerca
-                            </b-button>
-                        </b-col>
-                    </b-row>
-                </b-form>
-            </div>
+                            </b-col>
+                        </b-row>
+                    </b-form>
+                </div>
+            </b-container>
         </section>
-    </b-container>
+        <result 
+            v-if="isSubmit"
+            :class="[resultDisplay]"  
+            :routes="routes" 
+            :passengers="passengers"
+            :isTour="isTour"
+            @close="onResultClose"
+        ></result>
+        <b-modal ref="setReturnModal" hide-footer hide-header centered no-close-on-backdrop no-close-on-esc>
+            <b-container fluid class="text-center return-modal">
+                <b-row>
+                    <b-col>
+                        <h4>Desideri inserire il ritorno?</h4>
+                        <p></p>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col>
+                        <b-btn class="mt-3" variant="outline-warning" block @click="onReturnModalOk">Si, voglio il ritorno!</b-btn>
+                    </b-col>
+                    <b-col>
+                        <b-btn class="mt-3" variant="outline-warning" block @click="onReturnModalCancel">No, viaggio di sola andata</b-btn>
+                    </b-col>
+                </b-row>
+            </b-container>
+        </b-modal>
+     </div>
+    
 </template>
 
 <script>
     import RouteForm from './components/RouteForm';
+    import Result from './components/Result';
     import DateTimeHandler from './classes/DateTimeHandler';
     import Ready from './plugin/vue-google-maps/mixins/Ready';
     import moment from 'moment';
+    import RouteList from './classes/RouteList';
+    import Route from './classes/Route';
 
     export default {
         name: 'app',
 
         components: {
-            RouteForm
+            RouteForm,
+            Result
         },
 
         mixins: [
@@ -91,13 +137,16 @@
 
         data: function(){
             return {
-                passenger: null,
+                passengers: null,
                 routesComponents: [],
                 routes: [],
                 errorMessage: '',
                 error: false,
                 errorCountdown: 0,
-                errorDismissSecs: 5
+                errorDismissSecs: 5,
+                resultDisplay: 'none',
+                isSubmit: false,
+                isTour: false,
             }
         },
 
@@ -143,6 +192,7 @@
             removeRouteComponent: function(){
                 this.routesComponents.pop();
                 this.routes.pop();
+                this.routes[this.routes.length - 1].departure = null;
             },
 
             onChangeLocation: function(location, route){
@@ -159,7 +209,7 @@
                 }
                 
                 if(countReadyRoutes >= 2){
-                    this.$emit('form:have-a-route');
+                    this.$emit('form:have-a-route', routeIndex - 1, routeIndex);
                 }
             },
 
@@ -167,6 +217,7 @@
                 const routeIndex = this.routes.findIndex(r => r.id === route);
                 if(routeIndex !== undefined){
                     this.routes[routeIndex].departure = date.format('YYYY-MM-DD HH:mm');
+                    this.$emit('form:have-a-route', routeIndex, routeIndex + 1);
                 }
             },
 
@@ -177,8 +228,51 @@
                     this.routes[routeIndex].loc = Object.assign(this.routes[goingRouteIndex].loc, {});
                     this.routes[routeIndex].isReturn = true;
                     document.getElementById(autocomplete).value = this.routes[routeIndex].loc.address;
-                    this.$emit('form:have-a-route');
+                    this.$emit('form:have-a-route', routeIndex - 1, routeIndex);
                 }
+            },
+
+            onResultClose: function(){
+                this.resultDisplay = 'none';
+                this.routesComponents = [];
+                this.routes = [];
+                this.isSubmit = false;
+                this.addRoute('a-1');
+                const routeComponent = {
+                    id: "r-" + (this.routesComponents.length + 1),
+                    component: 'route-form',
+                    title: "Tappa #" + (this.routesComponents.length + 1),
+                    hasArrival: false
+                }
+                this.routesComponents.push(routeComponent);
+                this.addRoute(routeComponent.id);
+                this.passengers = '';
+                this.$radio.$emit('form:clear');
+            },
+
+            onReturnModalOk: function(){
+                this.$refs.setReturnModal.hide();
+                const routeComponent = {
+                    id: "r-" + (this.routesComponents.length + 1),
+                    component: 'route-form',
+                    title: "Tappa #" + (this.routesComponents.length + 1),
+                    hasArrival: false,
+                }
+                this.routesComponents.push(routeComponent);
+                this.addRoute(routeComponent.id);
+                this.$nextTick(() => {
+                    const addedRoute = this.routes[this.routes.length - 1];
+                    addedRoute.loc = Object.assign(this.routes[0].loc, {});
+                    addedRoute.isReturn = true;
+                    document.getElementById('ac-' + addedRoute.id).value = this.routes[0].loc.address;
+                    this.$emit('form:have-a-route', this.routes.length - 2, this.routes.length - 1);
+                });
+            },
+
+            onReturnModalCancel: function(){
+                this.$refs.setReturnModal.hide();
+                this.isTour = false;
+                this.submit(true);
             },
 
             checkForm: function(){
@@ -223,41 +317,63 @@
                 return null;
             },
 
-            submit: function(){
+            submit: function(skip=false){
                 if(!this.checkForm()){
                     return false;
                 }
 
-                if(this.passenger === null || this.passenger === ''){
+                if(this.passengers === null || this.passengers === ''){
                     this.error = true;
                     this.errorCountdown = this.errorDismissSecs;
                     this.errorMessage = 'Inserisci il numero dei passeggeri';
                     return false;
                 }
+                
+                if(!skip && this.isTour && this.routes.length < 3){
+                   this.$refs.setReturnModal.show();
+                   return false;
+                }else if(!skip){
+                    const start = this.routes[0];
+                    const end = this.routes[this.routes.length - 1];
+                    if(start.loc.address !== end.loc.address){
+                        this.$refs.setReturnModal.show();
+                        return false;
+                    }
+                }
 
-                console.log(JSON.parse(JSON.stringify(this.routes)), this.passenger);
+                this.isSubmit = true;
+                this.resultDisplay = 'fixed';
             }
         },
 
         googleMapsReady: function(){
-            this.$on('form:have-a-route', () => {
+            this.$on('form:have-a-route', (startIndex, endIndex) => {
+                if(startIndex < 0 || endIndex >= this.routes.length){
+                    return;
+                }
+
                 const ds = new google.maps.DirectionsService;
-                const routeOne = this.routes[this.routes.length - 2];
-                let routeTwo = this.routes[this.routes.length - 1];
-                if(!(routeOne.departure === undefined || routeOne.departure === null || routeOne.departure === '')){
+                const startRoute = this.routes[startIndex]; // ex routeOne 
+                let endRoute = this.routes[endIndex]; // ex endRoute
+                
+                if(endRoute.loc === undefined){
+                    return;
+                }
+
+                if(!(startRoute.departure === undefined || startRoute.departure === null || startRoute.departure === '')){
                     ds.route({
-                        origin: routeOne.loc,
-                        destination: routeTwo.loc,
+                        origin: startRoute.loc,
+                        destination: endRoute.loc,
                         travelMode: 'DRIVING'
                     }, (response, status) => {
                         const legs = response.routes[0].legs[0];
-                        const tmpArrival = moment(routeOne.departure);
+                        const tmpArrival = moment(startRoute.departure);
                         tmpArrival.add(legs.duration.value, 'seconds');
                         const arrival = DateTimeHandler.floorTimeToQuarter(tmpArrival);
-                        routeTwo.arrival = arrival.format("YYYY-MM-DD HH:mm");
-                        routeTwo.duration = DateTimeHandler.getDurationDiff(routeOne.departure, arrival);
-                        routeTwo.distance = legs.distance.value;
-                        this.routesComponents[this.routesComponents.length-1].hasArrival = true;
+                        endRoute.arrival = arrival.format("YYYY-MM-DD HH:mm");
+                        endRoute.duration = DateTimeHandler.getDurationDiff(startRoute.departure, arrival);
+                        endRoute.distance = legs.distance.value;
+                        this.routesComponents[endIndex - 1].hasArrival = true;
                     });
                 }
             });

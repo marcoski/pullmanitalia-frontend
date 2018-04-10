@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import Routes from "../../data/_routes";
-import EventsManager from '../../classes/EventsManager';
 
 export default {
     state: {
@@ -64,14 +63,14 @@ export default {
         loadRoutes: function(context, payload){
             return new Promise(resolve => {
                 setTimeout(() => {
-                    let routes = Routes.items.filter(route => route.pullman.supplier == payload.data.id);
+                    /*let routes = Routes.items.filter(route => route.pullman.supplier == payload.data.id);
                     const evManager = new EventsManager(routes, payload.data.date);
                     evManager.generateCalendarEvents();
                     context.commit('loadRoutes', {
                         items: evManager.calendarEvents,
                         count: evManager.calendarEvents.length
                     });
-                    resolve();
+                    resolve();*/
                 }, 1000);
             });
         },

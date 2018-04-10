@@ -2,7 +2,7 @@ const GmapsLoader = {
     loaded: false,
     readyPromises: [],
 
-    load: function({apiKey, version, libraries, loadCn}){
+    load: function({apiKey, version, libraries, loadCn, language}){
         if(typeof window === 'undefined'){
             return Promise.resolve()
         }
@@ -28,6 +28,10 @@ const GmapsLoader = {
                 options['libraries'] = librariesPath;
             }else if(Array.prototype.isPrototypeOf(options.libraries)){
                 options.libraries = options.libraries.join(',');
+            }
+
+            if(language){
+                options['language'] = language;
             }
 
             options['callback'] = 'googleMapsLoaded'

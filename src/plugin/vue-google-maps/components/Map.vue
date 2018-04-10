@@ -98,7 +98,7 @@ export default {
         },
         bounds: {
             type: Array,
-            default: []
+            default: () => ([])
         }
     },
 

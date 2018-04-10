@@ -8,6 +8,7 @@
                                 :id="autocompleteId"
                                 class="form-control app-form-address-search"
                                 country="it"
+                                :types="$app.configs.form.autocompleteTypes"
                                 placeholder="Indirizzo, hotel, destinazione..."
                                 ref="googleMapsAutocomplete"
                                 v-on:gmaps:autocomplete:place-changed="onChangeLocation"
@@ -16,7 +17,7 @@
                         <div slot="description">
                             <template v-if="hasArrival">
                                 <i class="fa fa-calendar"></i> 
-                                Arrivo previsto: {{ getArrivalDate(route.arrival) }} ({{ route.duration }} di viaggio)
+                                Arrivo previsto: {{ getArrivalDate(route.arrival) }} ({{ getRouteDuration(route.duration) }} di viaggio)
                             </template>
                         </div>
                     </b-form-group>
@@ -30,7 +31,7 @@
             <b-row v-if="!isLast">
                 <b-col>
                     <b-form-group label="Che giorno vuoi partire?">
-                        <datepicker v-on:selected="onDateSelected" :disabled="disabledDate"></datepicker>
+                        <datepicker input-class="form-control" :id="datepickerId" v-on:selected="onDateSelected" :disabled="disabledDate"></datepicker>
                     </b-form-group>
                 </b-col>
                 <b-col>
@@ -73,7 +74,22 @@ export default {
         }
     },
 
-    mounted: function(){
+    created: function(){
+        this.$radio.$on('form:clear', () => {
+            this.loc = null;
+            this.date = moment();
+            this.timeSelected = null;
+            this.stopDuration = '';
+            this.timeOptions = DateTimeHandler.getTimeOptions();
+            const autocomplete = document.getElementById(this.autocompleteId);
+            if(autocomplete !== null){
+                autocomplete.value = '';
+            }
+            const datepicker = document.getElementById(this.datepickerId);
+            if(datepicker !== null){
+                datepicker.value = '';
+            }
+        });
     },
 
     computed: {
@@ -95,6 +111,10 @@ export default {
 
         autocompleteId: function(){
             return "ac-" + this.id;
+        },
+
+        datepickerId: function(){
+            return "dp-" + this.id;
         }
     },
 
@@ -103,7 +123,8 @@ export default {
             this.loc = {
                 lat: location.latitude,
                 lng: location.longitude,
-                address: document.getElementById(id).value
+                address: document.getElementById(id).value,
+                locality: location.locality
             }
 
             this.$emit('route:changelocation', this.loc, this.id);
@@ -155,7 +176,9 @@ export default {
             }
 
             if(this.hasArrival){
-                this.stopDuration = DateTimeHandler.getDurationDiff(moment(this.route.arrival), this.date);
+                this.stopDuration = DateTimeHandler.getDurationString(
+                    DateTimeHandler.getDurationDiff(moment(this.route.arrival), this.date)
+                );
             }
 
             this.$emit('route:changedate', moment(this.date), this.id);
@@ -166,7 +189,9 @@ export default {
             this.date.set('minute', time.m);
 
             if(this.hasArrival){
-                this.stopDuration = DateTimeHandler.getDurationDiff(moment(this.route.arrival), this.date);
+                this.stopDuration = DateTimeHandler.getDurationString(
+                    DateTimeHandler.getDurationDiff(moment(this.route.arrival), this.date)
+                );
             }
 
             this.$emit('route:changedate', moment(this.date), this.id);
@@ -177,8 +202,12 @@ export default {
         },
 
         getArrivalDate: function(date){
-            return moment(date).format("DD MMM YYYY, HH:mm");
+            return moment(date).format(this.$app.configs.moment_datetime_format);
         },
+
+        getRouteDuration(duration){
+            return DateTimeHandler.getDurationString(duration);
+        }
     }
     
 }

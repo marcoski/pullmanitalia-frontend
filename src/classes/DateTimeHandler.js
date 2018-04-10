@@ -91,7 +91,7 @@ class DateTimeHandler{
 
   static getDurationDiff(dateOne, dateTwo){
     const duration = moment.duration(dateTwo.diff(dateOne));
-    return DateTimeHandler.getDurationString(duration.asSeconds());
+    return duration.asSeconds();
   }
 
   static getDurationString(seconds){

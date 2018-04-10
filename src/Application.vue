@@ -1,6 +1,6 @@
 <template>
     <div>
-        <section class="plan-container">
+        <section :class="['plan-container', planClass]">
             <b-container>
                 <div class="plan-content">
                     <h3>Inizia il tuo viaggio</h3>
@@ -145,6 +145,7 @@
                 errorCountdown: 0,
                 errorDismissSecs: 5,
                 resultDisplay: 'none',
+                planClass: 'block',
                 isSubmit: false,
                 isTour: false,
             }
@@ -234,6 +235,7 @@
 
             onResultClose: function(){
                 this.resultDisplay = 'none';
+                this.planClass = 'block';
                 this.routesComponents = [];
                 this.routes = [];
                 this.isSubmit = false;
@@ -342,6 +344,7 @@
                 }
 
                 this.isSubmit = true;
+                this.planClass = 'none';
                 this.resultDisplay = 'fixed';
             }
         },

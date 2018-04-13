@@ -15,9 +15,11 @@
                                             </b-form-group>
                                         </b-col>
                                         <b-col>
-                                            <b-form-checkbox v-model="isTour">
-                                                Vuoi il pullman sempre a disposizione?
-                                            </b-form-checkbox>
+                                            <label class="custom-control material-checkbox">
+                                                <input type="checkbox" v-model="isTour" class="material-control-input">
+                                                <span class="material-control-indicator"></span>
+                                                <span class="material-control-description">Vuoi il pullman sempre a disposizione?</span>
+                                            </label>
                                         </b-col>
                                     </b-row>
                                 </b-card>
@@ -26,6 +28,7 @@
                         <b-row class="mt-2 mb-2">
                             <b-col>
                                 <route-form v-for="(route, index) of routes.toArray()"
+                                    :key="index"
                                     :id="route.id" 
                                     :title="route.component.title"
                                     :route="route"
@@ -205,7 +208,7 @@
             },
 
             onReturnModalCancel: function(){
-                 this.$refs.setReturnModal.hide();
+                this.$refs.setReturnModal.hide();
                 this.isTour = false;
                 this.submit(true);
             },

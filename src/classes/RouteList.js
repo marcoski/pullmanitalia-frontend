@@ -142,6 +142,17 @@ class RouteList{
     toString(){
         return JSON.parse(JSON.stringify(this.toArray()));
     }
+
+    static toModel(route){
+        return {
+            id: route.id,
+            from: route.from,
+            to: route.to,
+            arrival: route.arrival,
+            departure: route.departure,
+            distance: route.duration
+        }
+    }
 }
 
 export default RouteList;

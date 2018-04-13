@@ -1,10 +1,10 @@
 <template>
     <div>
         <template v-for="(prices, route) of getPrices(pullmans)">
-            <b-row>
+            <b-row :key="route">
                 <b-col cols="10"><h4>Tappa #{{route+1}}: {{ getRoute(route) }}</h4></b-col>
             </b-row>
-            <b-row class="mt-2" v-for="(price, p) of prices">
+            <b-row class="mt-2" v-for="(price, p) of prices" :key="p">
                 <b-col cols="2">
                     <input type="radio" v-model="selected[route]" :value="{cost: price.price, pullman: price.pullman, route: price.route}" />
                 </b-col>
@@ -30,6 +30,7 @@
     import moment from 'moment';
     import _ from 'lodash';
     import PriceManager from '../classes/Price/PriceManager';
+    import RouteList from '../classes/RouteList';
     
     export default {
         name: 'price-trf',
@@ -74,7 +75,7 @@
                             let price = {
                                 pullman: pullman,
                                 price: priceManager.price(),
-                                route: route
+                                route: RouteList.toModel(route)
                             }
                             routePrices.push(price);
                         }
@@ -122,15 +123,10 @@
             },
 
             getRental: function(price){
-                let routeIndex = this.routes.findIndex(r => r.id === price.route.id);
+                let r = this.routes.find(r => r.id === price.route.id);
                 let rentalRoutes = [];
-                if(routeIndex !== undefined){
-                    rentalRoutes.push(_.cloneDeep(
-                        this.routes[routeIndex - 1]
-                    ));
-                    rentalRoutes.push(_.cloneDeep(
-                        this.routes[routeIndex]
-                    ));
+                if(r !== undefined){
+                    rentalRoutes.push(_.cloneDeep(RouteList.toModel(r)));
                 }
                 return {
                     cost: price.cost, 

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-row v-for="(price, p) of getPrices(pullmans)">
+        <b-row v-for="(price, p) of getPrices(pullmans)" :key="p">
             <b-col cols="2"><input type="radio" v-model="selected" :value="{cost: price.price, pullman: price.pullman}"/></b-col>
             <b-col cols="5"><h4>{{ price.pullman.name }}</h4></b-col>
             <b-col cols="5" class="text-center">
@@ -24,6 +24,7 @@
     import moment from 'moment';
     import _ from 'lodash';
     import PriceManager from '../classes/Price/PriceManager';
+    import RouteList from '../classes/RouteList';
     
     export default {
         name: 'price-disp-tour',
@@ -67,7 +68,7 @@
             getRental: function(price){
                 let rentalRoutes = [];
                 for(let route of this.routes.toArray()){
-                    let rentalRoute = _.cloneDeep(route);
+                    let rentalRoute = _.cloneDeep(RouteList.toModel(route));
                     rentalRoute.pullman = price.pullman;
                     rentalRoutes.push(rentalRoute);
                 }

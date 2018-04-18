@@ -126,7 +126,9 @@
                 let r = this.routes.find(r => r.id === price.route.id);
                 let rentalRoutes = [];
                 if(r !== undefined){
-                    rentalRoutes.push(_.cloneDeep(RouteList.toModel(r)));
+                    const rentalRoute = _.cloneDeep(RouteList.toModel(r));
+                    rentalRoute.pullman = price.pullman;
+                    rentalRoutes.push(_.cloneDeep(rentalRoute));
                 }
                 return {
                     cost: price.cost, 

@@ -52,7 +52,7 @@
         methods: {
             isDisp: function(){
                 let duration = this.totalTravelDuration * 1000;
-                if(this.routes.count() > 1 && moment.duration(duration).asHours() <= 24){
+                if(this.isTour && this.routes.count() > 1 && moment.duration(duration).asHours() <= 24){
                     const start = this.routes.getFirst();
                     const end = this.routes.getLast();
                     if(start.from.address === end.to.address){
